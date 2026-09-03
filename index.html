@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Stock Merchandising · LUC Rugby</title>
+<meta name="description" content="Stock du merchandising du LUC Rugby : vêtements, accessoires et anciens maillots encore disponibles.">
+<meta name="robots" content="noindex, nofollow">
+<meta name="theme-color" content="#063465">
+
+<link rel="icon" href="img/logo.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="img/apple-touch-icon.png">
+<link rel="manifest" href="manifest.json">
+<meta name="apple-mobile-web-app-title" content="Stock LUC">
+<meta name="apple-mobile-web-app-capable" content="yes">
+
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<header class="site-header">
+  <div class="wrap header-inner">
+    <img class="logo" src="img/logo.svg" alt="LUC Rugby" width="286" height="351">
+    <div class="header-text">
+      <h1>Stock Merchandising</h1>
+      <p>LUC Rugby &middot; saison 2025&ndash;2026</p>
+    </div>
+  </div>
+</header>
+
+<!-- Barre collante : reste accessible au pouce pendant le defilement -->
+<div class="toolbar" id="toolbar">
+  <div class="wrap">
+    <div class="toolbar-row">
+      <label class="sr-only" for="search">Rechercher un article</label>
+      <input type="search" id="search" placeholder="Rechercher un article ou une taille" autocomplete="off">
+    </div>
+    <nav class="tabs" id="tabs" aria-label="Catégories"></nav>
+  </div>
+</div>
+
+<main class="wrap">
+
+  <div class="list-head">
+    <p class="result-count" id="result-count" role="status" aria-live="polite"></p>
+    <button type="button" class="pill" id="hide-sold-out" aria-pressed="false">
+      Masquer les épuisés
+    </button>
+  </div>
+
+  <div id="grid" class="grid"></div>
+
+  <p class="empty" id="empty" hidden>Aucun article ne correspond à votre recherche.</p>
+
+  <section class="how-to">
+    <h2>Comment commander</h2>
+    <p id="how-to-text"></p>
+  </section>
+
+</main>
+
+<footer class="site-footer">
+  <div class="wrap">
+    <p id="data-status" class="data-status">Chargement du stock…</p>
+    <p class="footer-fine">
+      Les quantités proviennent du fichier de gestion du club et se mettent à jour
+      automatiquement. Comptez quelques minutes après une modification.
+    </p>
+  </div>
+</footer>
+
+<div class="lightbox" id="lightbox" hidden>
+  <button class="lightbox-close" id="lightbox-close" aria-label="Fermer">&times;</button>
+  <img id="lightbox-img" alt="">
+</div>
+
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

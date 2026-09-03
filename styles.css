@@ -1,0 +1,350 @@
+/* ------------------------------------------------------------------
+   LUC Rugby - Stock Merchandising
+
+   Ecrit pour le telephone d'abord : les styles de base visent un
+   petit ecran, les media queries n'ajoutent que ce qui est utile
+   au-dela. Couleurs reprises du logo officiel du club.
+   ------------------------------------------------------------------ */
+
+:root {
+  --navy:      #063465;   /* bleu du logo */
+  --navy-dark: #04213f;
+  --sky:       #84abde;   /* bleu clair du logo */
+  --sky-pale:  #d1e5f9;   /* bleu tres pale du logo */
+  --gold:      #efd642;   /* jaune du logo */
+  --crimson:   #bf1050;   /* rouge du logo */
+  --ink:       #16202e;
+  --muted:     #5f6b7d;
+  --line:      #dde4ed;
+  --bg:        #f4f7fb;
+  --card:      #ffffff;
+  --ok:        #146b52;
+  --ok-bg:     #e4f3ed;
+  --ok-line:   #bfe0d3;
+  --radius:    12px;
+  --shadow:    0 1px 2px rgba(6,52,101,.06), 0 4px 14px rgba(6,52,101,.07);
+  --pad:       14px;      /* marge laterale, elargie sur grand ecran */
+}
+
+* { box-sizing: border-box; }
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: 118px;   /* pour que l'ancrage ne passe pas sous la barre collante */
+}
+
+body {
+  margin: 0;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  color: var(--ink);
+  background: var(--bg);
+  overscroll-behavior-y: none;
+}
+
+/* Respecte les encoches et coins arrondis des telephones recents. */
+.wrap {
+  width: 100%;
+  max-width: 1180px;
+  margin: 0 auto;
+  padding-left: max(var(--pad), env(safe-area-inset-left));
+  padding-right: max(var(--pad), env(safe-area-inset-right));
+}
+
+.sr-only {
+  position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px;
+  overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; border: 0;
+}
+
+/* ---------- En-tete ---------- */
+
+.site-header {
+  background: var(--navy);
+  color: #fff;
+  border-bottom: 3px solid var(--gold);
+}
+
+.header-inner {
+  display: flex; align-items: center; gap: 12px;
+  padding-top: 12px; padding-bottom: 12px;
+}
+
+.logo { width: auto; height: 42px; flex: none; }
+
+.header-text h1 {
+  margin: 0;
+  font-size: 1.05rem; font-weight: 700; letter-spacing: -.01em;
+  line-height: 1.2;
+}
+.header-text p { margin: 1px 0 0; font-size: .78rem; color: var(--sky); }
+
+/* ---------- Barre collante ---------- */
+
+.toolbar {
+  position: sticky; top: 0; z-index: 20;
+  background: rgba(255,255,255,.96);
+  backdrop-filter: saturate(140%) blur(8px);
+  border-bottom: 1px solid var(--line);
+  padding-top: 9px;
+}
+
+.toolbar-row { display: flex; gap: 8px; align-items: center; }
+
+/* Le filtre accompagne le decompte : il n'a pas besoin de rester colle en
+   haut, et la barre collante garde ainsi toute sa largeur pour la recherche. */
+.list-head {
+  display: flex; align-items: center; justify-content: space-between;
+  gap: 10px; flex-wrap: wrap;
+  margin: 13px 0 0;
+}
+.list-head .result-count { margin: 0; }
+.list-head .pill { min-height: 38px; font-size: .78rem; }
+
+/* 16px minimum : en dessous, iOS zoome automatiquement au focus. */
+#search {
+  flex: 1 1 auto; min-width: 0;
+  height: 42px; padding: 0 13px;
+  font: inherit; font-size: 16px; color: var(--ink);
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  -webkit-appearance: none; appearance: none;
+}
+#search:focus {
+  outline: none;
+  border-color: var(--sky);
+  box-shadow: 0 0 0 3px rgba(132,171,222,.35);
+}
+
+.pill {
+  flex: none;
+  min-height: 42px; padding: 0 13px;
+  font: inherit; font-size: .82rem; font-weight: 600; line-height: 1.2;
+  color: var(--navy); background: var(--card);
+  border: 1px solid var(--line); border-radius: 10px;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.pill[aria-pressed="true"] {
+  color: #fff; background: var(--navy); border-color: var(--navy);
+}
+
+/* Onglets : une seule rangee qui defile horizontalement au doigt. */
+.tabs {
+  display: flex; gap: 7px;
+  padding: 9px 0;
+  overflow-x: auto;
+  scrollbar-width: none;
+  -webkit-overflow-scrolling: touch;
+}
+.tabs::-webkit-scrollbar { display: none; }
+
+.tab {
+  flex: none;
+  min-height: 38px; padding: 0 14px;
+  font: inherit; font-size: .85rem; font-weight: 600;
+  color: var(--navy); background: var(--card);
+  border: 1px solid var(--line); border-radius: 999px;
+  white-space: nowrap; cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+.tab[aria-selected="true"] {
+  color: #fff; background: var(--navy); border-color: var(--navy);
+}
+.tab .tab-count { opacity: .62; font-weight: 500; margin-left: 5px; }
+
+.result-count { margin: 13px 0 0; font-size: .8rem; color: var(--muted); }
+
+/* ---------- Liste des produits ----------
+   Sur telephone : une ligne par produit, vignette a gauche. Les puces de
+   taille disposent ainsi de toute la largeur, ce qui est l'information
+   que les membres viennent chercher. */
+
+.grid {
+  display: flex; flex-direction: column; gap: 10px;
+  margin: 12px 0 26px;
+}
+
+.card {
+  display: flex; flex-direction: row;
+  background: var(--card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  box-shadow: var(--shadow);
+  overflow: hidden;
+}
+
+.card-photo {
+  width: 104px; flex: none;
+  align-self: stretch;
+  min-height: 104px;
+  background: var(--sky-pale);
+  border: 0; padding: 0; margin: 0;
+  cursor: zoom-in;
+  -webkit-tap-highlight-color: transparent;
+}
+.card-photo img { width: 100%; height: 100%; object-fit: contain; display: block; }
+.card-photo.no-photo { display: grid; place-items: center; cursor: default; }
+.card-photo.no-photo span { color: var(--navy); opacity: .5; font-size: .68rem; text-align: center; }
+
+.card-body {
+  flex: 1 1 auto; min-width: 0;
+  display: flex; flex-direction: column; gap: 7px;
+  padding: 11px 13px 12px;
+}
+
+/* Le bleu clair du logo est trop peu contraste sur blanc pour un texte
+   aussi petit : on utilise une declinaison plus foncee. */
+.card-brand {
+  font-size: .62rem; font-weight: 700; letter-spacing: .08em;
+  text-transform: uppercase; color: #43709f;
+}
+
+.card-title-row { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; }
+.card-title { margin: 0; font-size: .95rem; font-weight: 700; line-height: 1.25; }
+.card-price { font-size: .9rem; font-weight: 700; color: var(--navy); white-space: nowrap; }
+
+.card-total { margin: 0; font-size: .76rem; color: var(--muted); }
+.card-total.out { color: var(--crimson); font-weight: 600; }
+
+.sizes { display: flex; flex-wrap: wrap; gap: 6px; list-style: none; margin: 0; padding: 0; }
+
+.size {
+  display: inline-flex; align-items: baseline; gap: 5px;
+  font-size: .82rem;
+  padding: 5px 9px;
+  border-radius: 8px;
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-line);
+  color: var(--ok);
+}
+.size b { font-weight: 700; }
+.size .qty { font-weight: 600; opacity: .85; }
+
+.size.is-out {
+  background: #f2f4f7; border-color: var(--line); color: #98a1ae;
+  text-decoration: line-through;
+}
+
+/* Anciens maillots : numeros disponibles */
+.numbers { border-top: 1px dashed var(--line); padding-top: 8px; }
+/* min-height : c'est la commande la plus utilisee de l'onglet maillots,
+   elle doit rester confortable au pouce. */
+.numbers summary {
+  display: flex; align-items: center;
+  min-height: 38px; padding: 3px 0;
+  font-size: .78rem; font-weight: 600; color: var(--navy);
+  cursor: pointer; list-style: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.numbers summary::-webkit-details-marker { display: none; }
+.numbers summary::before { content: "▸ "; }
+.numbers[open] summary::before { content: "▾ "; }
+.numbers dl { margin: 7px 0 0; font-size: .78rem; }
+.numbers dt { font-weight: 700; color: var(--navy); }
+.numbers dd { margin: 1px 0 6px; color: var(--muted); word-break: break-word; }
+
+.card-note {
+  margin: 0; font-size: .74rem; color: var(--muted);
+  background: var(--bg); border-radius: 7px; padding: 6px 8px;
+  word-break: break-word;
+}
+
+.card.is-link .card-body { justify-content: center; }
+.card-link {
+  align-self: flex-start;
+  min-height: 38px; display: inline-flex; align-items: center;
+  font-size: .82rem; font-weight: 600;
+  color: #fff; background: var(--navy);
+  padding: 0 14px; border-radius: 9px; text-decoration: none;
+}
+
+.empty { text-align: center; color: var(--muted); padding: 34px 0; }
+
+/* ---------- Comment commander ---------- */
+
+.how-to {
+  background: var(--sky-pale);
+  border: 1px solid #b9d6f2;
+  border-radius: var(--radius);
+  padding: 15px 16px;
+  margin-bottom: 26px;
+}
+.how-to h2 { margin: 0 0 5px; font-size: .95rem; color: var(--navy); }
+.how-to p { margin: 0; font-size: .87rem; color: #1f4470; }
+
+/* ---------- Pied de page ---------- */
+
+.site-footer {
+  background: var(--navy);
+  color: #b6cde8;
+  padding: 17px 0 calc(22px + env(safe-area-inset-bottom));
+  font-size: .78rem;
+}
+.data-status { margin: 0 0 4px; font-weight: 600; color: #dbe9f8; }
+.data-status.is-stale { color: var(--gold); }
+.data-status.is-error { color: #ffb0ab; }
+.footer-fine { margin: 0; opacity: .75; max-width: 62ch; }
+
+/* ---------- Visionneuse ---------- */
+
+.lightbox {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-items: center;
+  padding: 18px;
+  background: rgba(4,20,40,.93);
+}
+.lightbox[hidden] { display: none; }
+.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; background: #fff; }
+.lightbox-close {
+  position: absolute;
+  top: calc(10px + env(safe-area-inset-top)); right: 14px;
+  width: 44px; height: 44px;          /* cible tactile confortable */
+  font-size: 26px; line-height: 1;
+  color: #fff; background: rgba(255,255,255,.16);
+  border: none; border-radius: 50%; cursor: pointer;
+}
+
+/* ---------- Tablette : on repasse en grille de cartes ---------- */
+
+@media (min-width: 620px) {
+  :root { --pad: 18px; }
+
+  .header-inner { padding-top: 16px; padding-bottom: 16px; gap: 14px; }
+  .logo { height: 54px; }
+  .header-text h1 { font-size: 1.3rem; }
+  .header-text p { font-size: .85rem; }
+
+  .grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(238px, 1fr));
+    gap: 16px;
+  }
+  .card { flex-direction: column; }
+  .card-photo { width: 100%; aspect-ratio: 1 / 1; min-height: 0; }
+  .card-body { padding: 13px 14px 15px; gap: 9px; }
+  .card-title { font-size: 1rem; }
+
+  .toolbar-row { gap: 10px; }
+  #search { flex: 0 1 340px; }
+  .tabs { flex-wrap: wrap; overflow: visible; }
+}
+
+@media (min-width: 980px) {
+  :root { --pad: 22px; }
+  .grid { grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); gap: 18px; }
+}
+
+/* ---------- Confort et accessibilite ---------- */
+
+@media (prefers-reduced-motion: reduce) {
+  * { animation: none !important; transition: none !important; }
+}
+
+:focus-visible { outline: 3px solid var(--sky); outline-offset: 2px; }
+
+@media print {
+  .toolbar, .site-footer, .lightbox { display: none; }
+  .card { break-inside: avoid; box-shadow: none; }
+}
