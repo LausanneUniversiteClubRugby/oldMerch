@@ -124,7 +124,6 @@ function parseSheet(grid, source, manifest) {
   // Positions relatives constantes dans le fichier de gestion.
   const brandRow = h - 4, nameRow = h - 3, priceRow = h - 1;
   const products = [];
-  const claimed  = new Set();
 
   for (let c = 0; c < grid[h].length; c++) {
     const head = norm(at(h, c));
@@ -134,8 +133,6 @@ function parseSheet(grid, source, manifest) {
 
     const name = at(nameRow, c);
     if (!name) continue;
-
-    claimed.add(c); claimed.add(c + 1);
 
     const brandRaw = at(brandRow, c);
     const brand    = norm(brandRaw) === 'ok' ? '' : brandRaw;   // "ok" = marque de controle interne
@@ -196,34 +193,28 @@ function parseSheet(grid, source, manifest) {
     });
   }
 
-  // Blocs sans stock : encart "shop en ligne" et equivalents.
-  const nameCells = grid[nameRow] || [];
-  for (let c = 0; c < nameCells.length; c++) {
-    if (claimed.has(c)) continue;
-    const name = at(nameRow, c);
-    if (!name) continue;
-
-    let url = '';
-    for (let r = h - 1; r < grid.length && !url; r++) {
-      for (const cell of [at(r, c), at(r, c + 1)]) {
-        const m = String(cell).match(/https?:\/\/\S+/);
-        if (m) { url = m[0]; break; }
-      }
-    }
-    if (!url) continue;
-
-    products.push({
-      type: 'link',
-      category: source.key,
-      categoryLabel: source.label,
-      name,
-      subtitle: at(priceRow, c),
-      url,
-      images: lookupImages(manifest, source.sheet, name)
-    });
-  }
-
+  // Les blocs sans en-tetes de stock (la colonne "SHOP EN LIGNE") sont
+  // volontairement ignores : la boutique est definie dans CONFIG.shop.
   return products;
+}
+
+/**
+ * La boutique en ligne n'a pas de stock a suivre. Elle est decrite une fois
+ * dans config.js et epinglee en fin de chaque categorie, plutot que lue dans
+ * la feuille de gestion.
+ */
+function buildShopTile() {
+  const s = CONFIG.shop;
+  if (!s || !s.url) return null;
+  return {
+    type: 'link',
+    name: s.name || 'Shop en ligne',
+    subtitle: s.subtitle || '',
+    url: s.url,
+    linkLabel: s.linkLabel || 'Voir la boutique',
+    keywords: s.keywords || '',
+    images: s.image ? [s.image] : []
+  };
 }
 
 function lookupImages(manifest, sheet, name) {
@@ -258,6 +249,7 @@ async function loadJSON(path) {
 
 const state = {
   products: [],
+  shop: null,          // tuile boutique, hors categories et toujours en dernier
   category: 'all',
   query: '',
   hideSoldOut: !!CONFIG.hideSoldOutByDefault
@@ -273,6 +265,8 @@ const el = {
   search:  document.getElementById('search'),
   hide:    document.getElementById('hide-sold-out'),
   howTo:   document.getElementById('how-to-text'),
+  title:   document.getElementById('site-title'),
+  subtitle: document.getElementById('site-subtitle'),
   lb:      document.getElementById('lightbox'),
   lbImg:   document.getElementById('lightbox-img'),
   lbClose: document.getElementById('lightbox-close')
@@ -286,7 +280,7 @@ function visibleProducts() {
   const q = norm(state.query);
   return state.products.filter(p => {
     if (state.category !== 'all' && p.category !== state.category) return false;
-    if (state.hideSoldOut && p.type === 'stock' && p.total <= 0) return false;
+    if (state.hideSoldOut && p.total <= 0) return false;
     if (!q) return true;
     const haystack = norm([
       p.name, p.brand, p.categoryLabel,
@@ -294,6 +288,25 @@ function visibleProducts() {
     ].join(' '));
     return haystack.includes(q);
   });
+}
+
+/**
+ * La tuile boutique ignore la categorie choisie, mais reste soumise a la
+ * recherche : sinon le message "aucun article ne correspond" ne pourrait
+ * jamais s'afficher.
+ */
+function shopVisible() {
+  if (!state.shop) return false;
+  const q = norm(state.query);
+  if (!q) return true;
+  return norm([state.shop.name, state.shop.subtitle, state.shop.keywords].join(' ')).includes(q);
+}
+
+/** Liste affichee : les articles de la categorie, puis la boutique en dernier. */
+function displayedProducts() {
+  const list = visibleProducts();
+  if (shopVisible()) list.push(state.shop);
+  return list;
 }
 
 /**
@@ -307,9 +320,11 @@ function backToTopOfList() {
 }
 
 function renderTabs() {
-  const counts = { all: state.products.length };
+  // La boutique figure dans chaque categorie : elle compte partout pour un.
+  const shop = state.shop ? 1 : 0;
+  const counts = { all: state.products.length + shop };
   CONFIG.sources.forEach(s => {
-    counts[s.key] = state.products.filter(p => p.category === s.key).length;
+    counts[s.key] = state.products.filter(p => p.category === s.key).length + shop;
   });
 
   const tabs = [{ key: 'all', label: 'Tout' },
@@ -369,7 +384,7 @@ function cardHtml(p) {
         <h3 class="card-title">${escapeHtml(p.name)}</h3>
         ${p.subtitle ? `<p class="card-total">${escapeHtml(p.subtitle)}</p>` : ''}
         <a class="card-link" href="${escapeHtml(p.url)}" target="_blank" rel="noopener noreferrer">
-          Voir la boutique
+          ${escapeHtml(p.linkLabel)}
         </a>
       </div>
     </article>`;
@@ -397,7 +412,7 @@ function cardHtml(p) {
 }
 
 function renderGrid() {
-  const list = visibleProducts();
+  const list = displayedProducts();
   el.grid.innerHTML = list.map(cardHtml).join('');
   el.empty.hidden = list.length > 0;
 
@@ -433,8 +448,16 @@ function setStatus(text, cls) {
 }
 
 async function init() {
+  // Les valeurs du HTML servent de repli si elles sont absentes de config.js.
+  if (CONFIG.title) el.title.textContent = CONFIG.title;
+  if (CONFIG.subtitle) {
+    el.subtitle.textContent = CONFIG.subtitle;
+    document.title = `${CONFIG.title || el.title.textContent} · ${CONFIG.subtitle}`;
+  }
+
   el.howTo.textContent = CONFIG.howToOrder;
   el.hide.setAttribute('aria-pressed', String(state.hideSoldOut));
+  state.shop = buildShopTile();
 
   el.search.addEventListener('input', () => { state.query = el.search.value; renderGrid(); });
   el.hide.addEventListener('click', () => {

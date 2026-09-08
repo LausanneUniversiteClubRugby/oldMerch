@@ -1,0 +1,16 @@
+# Le depot est PUBLIC. Rien de ce qui suit ne doit y arriver.
+
+# Le fichier de gestion contient l'onglet "Comment Acheter", donc un numero
+# de telephone personnel. Il reste sur l'ordinateur, jamais sur GitHub.
+*.xlsx
+*.xls
+*.xlsm
+*.csv
+
+# Anciennes versions du site conservees en local.
+*.zip
+
+# Fichiers systeme
+Thumbs.db
+desktop.ini
+.DS_Store

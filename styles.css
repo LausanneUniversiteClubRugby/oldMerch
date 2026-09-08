@@ -296,7 +296,13 @@ body {
   background: rgba(4,20,40,.93);
 }
 .lightbox[hidden] { display: none; }
-.lightbox img { max-width: 100%; max-height: 100%; border-radius: 8px; background: #fff; }
+/* Les photos produit ont un fond transparent : sur du blanc, un maillot blanc
+   deviendrait invisible. On reprend donc le bleu pale des vignettes. */
+.lightbox img {
+  max-width: 100%; max-height: 100%;
+  border-radius: 8px;
+  background: var(--sky-pale);
+}
 .lightbox-close {
   position: absolute;
   top: calc(10px + env(safe-area-inset-top)); right: 14px;
