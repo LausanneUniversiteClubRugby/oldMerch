@@ -56,7 +56,7 @@ const CONFIG = {
   /* Titre et sous-titre affiches dans l'en-tete, a cote du logo.
      C'est ici qu'on change la saison chaque annee. */
   title: 'Stock Merchandising',
-  subtitle: 'LUC Rugby · saison 2025–2026',
+  subtitle: 'LUC Rugby · saison 2026–2027',
 
   currency: 'CHF',
 
